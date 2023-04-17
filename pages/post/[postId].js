@@ -13,7 +13,7 @@ import {
 } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { app, auth, db } from "../../firebase/config";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 function Post() {
   const provider = new GoogleAuthProvider();
@@ -22,6 +22,8 @@ function Post() {
 
   const router = useRouter();
   const { postId } = router.query;
+  const { push } = useRouter();
+
 
   const signIn = () => {
     signInWithPopup(auth, provider)
@@ -60,6 +62,13 @@ function Post() {
       });
     }
   };
+
+  const deletePost = async (postId) => {
+    await deleteDoc(doc(db, "posts", postId));
+    alert("Post had been deleted")
+    push("/")
+  };
+
 
   useEffect(() => {
     fetchPosts();
@@ -117,12 +126,15 @@ function Post() {
           )}
 
           <div className="w-[90%] h-auto mt-8 grid grid-cols-3 gap-8">
-            <div className="relative h-[150px] bg-gray-100">
-              <Image src={post.image[0]} alt="" layout="fill"></Image>
-            </div>
-            <div className="h-[150px] bg-gray-100"></div>
-            <div className="h-[150px] bg-gray-100"></div>
-            <div className="h-[150px] bg-gray-100"></div>
+
+            {post.image.map((image,i) => {
+                return (
+                    <div className="relative h-[150px] bg-gray-100" key={i}>
+                        <Image src={image} alt="" layout="fill"></Image>
+                    </div>
+                )
+            })
+            }
           </div>
 
           <div className="relative flex flex-row  justify-evenly items-center top-[40px] w-[50%] h-[40px]">
@@ -134,10 +146,16 @@ function Post() {
             </Link>
             <Link
               href={`/editpost/${postId}`}
-              className=" text-lg p-1 bg-red-300 text-center w-[30%] rounded-lg font-bold text-white"
+              className=" text-lg p-1 bg-[#77DD77] text-center w-[30%] rounded-lg font-bold text-white"
             >
               Edit
             </Link>
+            <button
+              onClick={() => deletePost(postId)}
+              className=" text-lg p-1 bg-red-300 text-center w-[30%] rounded-lg font-bold text-white"
+            >
+              Delete
+            </button>
           </div>
         </div>
       ) : (

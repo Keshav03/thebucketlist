@@ -11,13 +11,17 @@ import {
   signOut,
 } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { app, auth, db } from "../firebase/config";
 
+import { app, auth, db } from "../firebase/config";
 import { addDoc, collection } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function AddPost() {
   const provider = new GoogleAuthProvider();
   const [user, loading] = useAuthState(auth);
+  const storage = getStorage();
+  const storageRef = ref(storage);
+  const { push } = useRouter();
 
   //Input States
   const [state, setState] = useState({
@@ -26,20 +30,25 @@ export default function AddPost() {
     when: "",
     where: "",
     story: "",
+    images: [],
   });
-
-  const { push } = useRouter();
 
   //Handle input field and set states
   const handleInput = (event) => {
     const target = event.target;
     const value = target.value;
-    // if(target.name == "title" && value==""){
-    // }
+    const name = target.name;
     if (value != "") {
-      const name = target.name;
       setState({ ...state, [name]: value });
     }
+  };
+
+  const handleFileInput = (event) => {
+    const target = event.target;
+    const value = target.files;
+    const name = target.name;
+    const imageArray = [...target.files];
+    setState({ ...state, [name]: imageArray });
   };
 
   const signIn = () => {
@@ -63,17 +72,45 @@ export default function AddPost() {
       .catch((error) => {});
   };
 
+  //UPLOAD IMAGES AND GET URL
+  let uploadImage = () => {
+    let url = "";
+    let images = [];
+    state.images.map((image) => {
+      console.log(image);
+      const imageRef = ref(storage, `images/${image.name}`);
+      uploadBytes(imageRef, image).then((snapshot) => {
+        getDownloadURL(snapshot.ref).then((downloadURL) => {
+          url = downloadURL;
+          console.log(typeof(url))
+          images.push(url);
+        });
+      });
+      
+    });
+    // console.log(images)
+    alert("Image Uploaded");
+    return images
+  };
+
   let addPost = async () => {
-    console.log(user);
     if (user) {
       try {
-        const docRef = await addDoc(collection(db, "posts"), {
+
+        const images = await uploadImage() 
+        console.log("1")
+        console.log(images[1],images[2])
+        console.log("2")
+
+
+        //CREATE POST AND USE url ARRAY
+        const docRef = addDoc(collection(db, "posts"), {
           title: state.title,
           how: state.how,
           when: state.when,
           where: state.where,
           completed: false,
-          image: ["/../public/images/post1.webp"],
+          image: images,
           uid: user.uid,
           story: state.story,
         });
@@ -122,9 +159,11 @@ export default function AddPost() {
         <input
           type="file"
           id="img"
-          name="img"
+          name="images"
           accept="image/*"
           className="mt-[50px] bg-gray-200 rounded-lg"
+          onChange={handleFileInput}
+          multiple
         ></input>
         <button
           onClick={addPost}

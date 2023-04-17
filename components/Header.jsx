@@ -11,7 +11,7 @@ export default function Header({user,signOut,signIn}) {
     return (
         <div className="relative w-100 h-[10vh] flex flex-row justify-evenly items-center bg-white drop-shadow-md margin-auto">
             <div className="flex justify-center items-center relative w-[250px] h-[10vh]" >
-                <Link href="/" ><h1 className="text-[#8BD3E6] text-4xl font-500 font-bold drop-shadow-xl">the BucketList</h1></Link>
+                <Link href="/" ><h1 className="text-[#78BE21] text-4xl font-500 font-bold drop-shadow-xl">the BucketList</h1></Link>
             </div>
             <div className="relative w-3/5 h-100 ">
                 <BiSearchAlt className="absolute left-[0%] top-[50%] translate-y-[-50%] w-[50px] h-[50%] text-gray-500"></BiSearchAlt>
@@ -27,7 +27,7 @@ export default function Header({user,signOut,signIn}) {
                 </div>
             :
                 <div className="flex flex-row justify-between w-[125px]">
-                    <button onClick={signIn} className="bg-[#8BD3E6] w-[100px] h-[40px] rounded-xl m-4 hover:bg-gray-500">Sign in</button>
+                    <button onClick={signIn} className="bg-[#78BE21] w-[100px] h-[40px] rounded-xl m-4 text-white text-bold hover:bg-[#68A61C]">Sign in</button>
                 </div>
             }
         </div>
